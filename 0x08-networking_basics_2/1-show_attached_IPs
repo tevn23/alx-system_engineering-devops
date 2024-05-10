@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# Displays all active IPv4 IPs on the machine its run on
+
+# Get the output of ifconfig and filter out IPv4 addresses
+ipv4_addresses=$(ifconfig | grep -oE 'inet (addr:)?([0-9]*\.){3}[0-9]*' | awk '{print $2}')
+
+# Print the IPv4 addresses
+echo "$ipv4_addresses"

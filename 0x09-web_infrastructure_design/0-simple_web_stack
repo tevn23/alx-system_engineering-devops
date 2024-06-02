@@ -1,0 +1,27 @@
+Web Infrastructure: https://imgur.com/nB50d2F
+
+- What is a server
+A server is a powerful computer program running on a dedicated computer system.
+
+- What is the role of the domain name
+A domain name is a user-friendly address for a website, instead of remembering complex numerical IP addresses.
+
+- What type of DNS record www is in www.foobar.com
+A CNAME record (Canonical Name record).
+
+- What is the role of the web server
+A web server acts as the middleman between your web browser and the website you're trying to access.
+
+- What is the role of the application server
+It sits between the web server and the database, handling the "behind-the-scenes" logic of the website. It processes user input, interacts with the database, and generates customized web pages based on the user's interaction.
+
+- What is the role of the database
+A database stores information in a way that's easy to access, organize, and modify.
+
+- What is the server using to communicate with the computer of the user requesting the website
+The server communicates with your computer using a set of protocols called the TCP/IP protocol suite.
+
+Issues with this infrastructure:
+- Numerous points of failure within the server (if any one fails then the rest of the system crashes)
+- Scaling is difficult
+- periodic downtime during updates and maintenance

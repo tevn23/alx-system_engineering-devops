@@ -1,0 +1,19 @@
+Web Infrastructure: https://imgur.com/O0EX0wm
+
+Every additional element is to ensure that high traffic is handled properly, service to be available during outages, better work distribution and better user experience. This improves the performance, reliability and scalability of our web infrastructure.
+
+Our Load Balancer will be using the round-robin algorithm this means that it will rotate the request assignment between servers. This will ensure that both servers have even number of tasks assigned to them.
+
+Our load balancer will be enabling an Active-Active set up. An active-active set up means that both servers will be actively running and handling all requests simultaneously. Active-Passive means that only one server will be handling all the traffic and requests, while other servers will be on standby. Only becoming active when the primary active server fails.
+
+In a Primary-Replica database cluster, the primary/master database handles all write operations and the other server(s) handle read operations.
+
+The difference between a Primary node and a Replica node is that a primary node can insert, update or delete operations and a replica node applies changes from the primary.
+
+Issues with the Infrastructure 
+
+SPOF will be on the load balancer server because if it fails the entire web becomes unavailable.
+
+Lack of firewalls and no HTTPS will lead to an insecure transport of data/information that is vulnerable to attackers. The entire session or connection will be exposed from different ports.
+
+Lack of monitoring may lead to unexpected downtime and poor user experience as we will not be aware of the state and health of our servers.

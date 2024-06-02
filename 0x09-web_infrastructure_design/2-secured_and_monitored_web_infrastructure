@@ -1,0 +1,28 @@
+Web Infrastructure: https://imgur.com/YHcty3z
+
+What are firewalls for:
+Firewalls act as security guards at the network level. They monitor incoming and outgoing traffic based on predefined rules, allowing legitimate traffic and blocking potentially harmful traffic like malware or unauthorized access attempts.
+
+Why is the traffic served over HTTPS:
+HTTPS (Hypertext Transfer Protocol Secure). HTTPS adds a layer of encryption to the communication, scrambling data as it travels between the server and user, making it much more difficult for attackers to intercept sensitive information.
+
+What monitoring is used for:
+Including monitoring sheds light on how website administrators proactively ensure a smooth user experience by identifying and resolving issues early on.
+
+How the monitoring tool is collecting data:
+Server logs: These logs record server activity, including user requests, errors, and response times.
+Agent software: Some tools install software agents on the server that actively monitor resource usage and performance metrics.
+External monitoring services: These services ping the website from different locations to assess uptime and response times.
+
+Explain what to do if you want to monitor your web server QPS:
+Use of Server software tools: Most web server software (like Apache or Nginx) have built-in modules or configuration options to track QPS.
+
+Use of Third-party monitoring tools: Many website monitoring services offer QPS monitoring as part of their packages. These tools often provide dashboards and alerts to help you visualize and react to changes in QPS.
+
+Issues
+
+Terminating the ssl at the load balancer might raise security concerns as it exposes decrypted traffic within the internal network if the load balancer becomes compromised
+
+Having only one MySQL server capable of accepting writes may limit scalability as one server may struggle to keep up and it introduces a SPOF.
+
+Having an identical setup may be inefficient as not all servers have the same resource requirements as well as introduce Maintenance Challenges as changes to one component potentially affects the others

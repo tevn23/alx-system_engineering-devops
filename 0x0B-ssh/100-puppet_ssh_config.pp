@@ -1,12 +1,12 @@
 # Puppet manifest to configure SSH client
-file { '~/.ssh':
+file { '/root/.ssh':
   ensure => directory,
   owner  => 'ubuntu',
   group  => 'ubuntu',
   mode   => '0700',
 }
 
-file { '~/.ssh/config':
+file { '/root/.ssh/config':
   ensure  => file,
   owner   => 'ubuntu',
   group   => 'ubuntu',
@@ -19,10 +19,10 @@ file { '~/.ssh/config':
   ',
 }
 
-file { '~/.ssh/school':
+file { '/root/.ssh/school':
   ensure => file,
   owner  => 'ubuntu',
   group  => 'ubuntu',
   mode   => '0600',
-  source => 'puppet://~/ssh/school',
+  source => 'puppet:///root/ssh/school',
 }

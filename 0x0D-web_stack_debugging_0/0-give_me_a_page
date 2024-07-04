@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# Initializes Apache2 on the web stack
+service apache2 start

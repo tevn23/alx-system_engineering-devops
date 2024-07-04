@@ -1,12 +1,12 @@
 # Puppet manifest to configure SSH client
-file { '/home/ubuntu/.ssh':
+file { '~/.ssh':
   ensure => directory,
   owner  => 'ubuntu',
   group  => 'ubuntu',
   mode   => '0700',
 }
 
-file { '/home/ubuntu/.ssh/config':
+file { '~/.ssh/config':
   ensure  => file,
   owner   => 'ubuntu',
   group   => 'ubuntu',
@@ -19,10 +19,10 @@ file { '/home/ubuntu/.ssh/config':
   ',
 }
 
-file { '/home/ubuntu/.ssh/school':
+file { '~/.ssh/school':
   ensure => file,
   owner  => 'ubuntu',
   group  => 'ubuntu',
   mode   => '0600',
-  source => 'puppet:///modules/ssh/school', # Make sure the private key is available in the module files
+  source => 'puppet://~/ssh/school',
 }

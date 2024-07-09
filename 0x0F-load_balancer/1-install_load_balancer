@@ -1,0 +1,80 @@
+#!/usr/bin/env bash
+# This script installs and configures HAProxy load balancer on an Ubuntu machine.
+
+# Ensure the script is run as root
+if [ "$(id -u)" -ne 0 ]; then
+    echo "This script must be run as root."
+    exit 1
+fi
+
+# Update package list and upgrade packages
+echo "Updating package list and upgrading packages..."
+apt update && apt -y upgrade
+
+# Source the OS release information
+. /etc/os-release
+
+# Install HAProxy and its dependencies
+echo "Installing HAProxy..."
+if [[ "$VERSION_CODENAME" == "focal" ]]; then
+    apt-get -y install --no-install-recommends software-properties-common
+    add-apt-repository -y ppa:vbernat/haproxy-2.8
+    apt-get update
+    apt-get -y install haproxy=2.8.\*
+else
+    apt-get -y install haproxy
+fi
+
+# Ensure rsyslog is installed and running
+if ! service rsyslog status > /dev/null 2>&1; then
+    if ! dpkg -s rsyslog >/dev/null 2>&1; then
+        apt-get -y install rsyslog
+    fi
+    service rsyslog enable
+    service rsyslog start
+fi
+
+echo "HAProxy installation completed."
+
+# Enable HAProxy at startup
+echo "ENABLED=1" > /etc/default/haproxy
+
+# Backup the original HAProxy configuration file
+cp /etc/haproxy/haproxy.cfg /etc/haproxy/haproxy.cfg.orig
+
+# Configure HAProxy with frontend and backend servers
+cat <<EOL > /etc/haproxy/haproxy.cfg
+frontend http_front
+    bind *:80
+    default_backend http_back
+
+backend http_back
+    balance roundrobin
+    server web-01 18.206.206.134:80 check
+    server web-02 18.204.13.59:80 check
+EOL
+
+# Reload HAProxy to apply changes
+echo "Reloading HAProxy..."
+if haproxy -c -f /etc/haproxy/haproxy.cfg; then
+    service haproxy reload
+    echo "HAProxy installation and configuration completed."
+else
+    echo "HAProxy configuration error. Please check the configuration."
+    exit 1
+fi
+
+# Verify HAProxy setup by sending requests and checking the X-Served-By header
+echo "Verifying HAProxy setup..."
+response1=$(curl -Is http://localhost | grep "X-Served-By")
+response2=$(curl -Is http://localhost | grep "X-Served-By")
+
+echo "Response 1: $response1"
+echo "Response 2: $response2"
+
+if [[ $response1 == *"web-01"* && $response2 == *"web-02"* ]] || [[ $response1 == *"web-02"* && $response2 == *"web-01"* ]]; then
+    echo "HAProxy is correctly distributing requests."
+else
+    echo "There seems to be an issue with the load balancing configuration."
+    exit 1
+fi

@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# Shorter version of my initial script
+pkill nginx
+sed -i 's/listen 80 default_server;/listen 0.0.0.0:80 default_server;/' /etc/nginx/sites-available/default
+service nginx start

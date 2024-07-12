@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 # Makes sure that Nginx is listening on port 80
-#!/bin/bash
 
 # Update package lists
 sudo apt-get update
@@ -14,7 +13,3 @@ sudo sed -i 's/listen \[::\]:80 default_server;/listen \[::\]:80 default_server;
 
 # Ensure Nginx is running and restart it to apply changes
 sudo service nginx restart
-
-# Confirm Nginx is running and configured correctly
-echo "Nginx is configured to listen on port 80 for all IPv4 IPs."
-echo "You can test it by running: curl 0:80 or curl localhost"

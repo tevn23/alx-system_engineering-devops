@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
 # Shorter version of my initial script
 ln -sf /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
-service nginx start
-kill $(pgrep 'nginx' | head n -1)
+sudo service nginx restart
+rm /run/nginx.pid

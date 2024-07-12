@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
 # Shorter version of my initial script
-pkill nginx
-sed -i 's/listen 80 default_server;/listen 0.0.0.0:80 default_server;/' /etc/nginx/sites-available/default
+ln -sf /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
 service nginx start
+kill $(pgrep 'nginx' | head n -1)

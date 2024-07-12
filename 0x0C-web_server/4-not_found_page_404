@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+# Script to install Nginx web server and configure redirection and custom 404 page
+
+# Update package lists and install Nginx
+sudo apt-get update
+sudo apt-get install -y nginx
+
+# Create a custom HTML page that contains "Hello World!"
+echo 'Hello World!' | sudo tee /var/www/html/index.html
+
+# Create a custom 404 HTML page
+echo "Ceci n'est pas une page" | sudo tee /var/www/html/custom_404.html
+
+# Ensure Nginx is listening on port 80 (default setting, but ensuring)
+sudo sed -i 's/listen 80 default_server;/listen 80 default_server;/' /etc/nginx/sites-available/default
+sudo sed -i 's/listen \[::\]:80 default_server;/listen \[::\]:80 default_server;/' /etc/nginx/sites-available/default
+
+# Add redirection to /redirect_me in the Nginx configuration
+sudo sed -i '/location \/ {/a \\tlocation /redirect_me {\n\t\treturn 301 https://www.youtube.com/;\n\t}' /etc/nginx/sites-available/default
+
+# Add custom 404 error page configuration
+sudo sed -i '/^http {/a \\terror_page 404 /custom_404.html;' /etc/nginx/nginx.conf
+sudo sed -i '/^server {/a \\tlocation = /custom_404.html {\n\t\tinternal;\n\t}' /etc/nginx/sites-available/default
+
+# Restart Nginx without using systemctl
+sudo service nginx restart

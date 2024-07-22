@@ -1,26 +1,42 @@
 #!/usr/bin/env bash
-# Script to install Nginx web server and configure redirection and custom 404 page
+# Sets up a new Ubuntu system by installing Nginx
+# Configures Nginx to listen on port 80
+# Creates a web page displaying "Hello World!" and
+# sets up a redirect for /redirect_me to a YouTube video
+#Finally sets 404 not found page
 
-# Update package lists and install Nginx
-sudo apt-get update
-sudo apt-get install -y nginx
+echo -e "Updating package lists and installing Nginx...\n"
+sudo apt-get update -y -qq && \
+         sudo apt-get install nginx -y
 
-# Create a custom HTML page that contains "Hello World!"
-echo 'Hello World!' | sudo tee /var/www/html/index.html
+# Provides feedback that package updates and Nginx installation are in progress
 
-# Create a custom 404 HTML page
-echo "Ceci n'est pas une page" | sudo tee /var/www/html/custom_404.html
+echo -e "\nPerforming additional setup tasks...\n"
 
-# Ensure Nginx is listening on port 80 (default setting, but ensuring)
-sudo sed -i 's/listen 80 default_server;/listen 80 default_server;/' /etc/nginx/sites-available/default
-sudo sed -i 's/listen \[::\]:80 default_server;/listen \[::\]:80 default_server;/' /etc/nginx/sites-available/default
+# Initiates the Nginx service
+sudo service nginx start
 
-# Add redirection to /redirect_me in the Nginx configuration
-sudo sed -i '/location \/ {/a \\tlocation /redirect_me {\n\t\treturn 301 https://www.youtube.com/;\n\t}' /etc/nginx/sites-available/default
+# Configures the firewall to allow Nginx traffic
+sudo ufw allow 'Nginx HTTP'
 
-# Add custom 404 error page configuration
-sudo sed -i '/^http {/a \\terror_page 404 /custom_404.html;' /etc/nginx/nginx.conf
-sudo sed -i '/^server {/a \\tlocation = /custom_404.html {\n\t\tinternal;\n\t}' /etc/nginx/sites-available/default
+# Adjusts file permissions and ownership for ease of editing
+sudo chown -R "$USER":"$USER" /var/www/html
+sudo chmod -R 755 /var/www
 
-# Restart Nginx without using systemctl
+# Saves a copy of the default index file for backup purposes
+cp /var/www/html/index.nginx-debian.html /var/www/html/index.nginx-debian.html.bckp
+
+# Updates the index file to display "Hello World!"
+echo -e "Hello World!" > /var/www/html/index.nginx-debian.html
+
+# Adds a redirection rule for /redirect_me to a YouTube URL
+sudo sed -i '24i\       rewrite ^/redirect_me https://www.youtube.com permanent;' /etc/nginx/sites-available/default
+
+# Adds a 404 page
+echo "Ceci n'est pas une page" >> /var/www/html/error_404.html
+sudo sed -i '25i\	error_page 404 /error_404.html;' /etc/nginx/sites-available/default
+
+# Restarts Nginx to apply the new configuration
 sudo service nginx restart
+
+echo -e "\nSetup is complete.\n"

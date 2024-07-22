@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Script to install Nginx web server
+# Script to install Nginx web server and configure redirection
+
 # Update package lists and install Nginx
 sudo apt-get update
 sudo apt-get install -y nginx
@@ -11,8 +12,14 @@ echo 'Hello World!' | sudo tee /var/www/html/index.html
 sudo sed -i 's/listen 80 default_server;/listen 80 default_server;/' /etc/nginx/sites-available/default
 sudo sed -i 's/listen \[::\]:80 default_server;/listen \[::\]:80 default_server;/' /etc/nginx/sites-available/default
 
+# Use sed to add the redirection configuration to the default site configuration
+sudo sed -i '/server_name _;/a \\n\
+    location /redirect_me {\n\
+        return 301 https://www.youtube.com/watch?v=QH2-TGUlwu4;\n\
+    }\n' /etc/nginx/sites-available/default
+
+# Test the Nginx configuration for syntax errors
+sudo nginx -t
+
 # Restart Nginx without using systemctl
 sudo service nginx restart
-
-# Confirm Nginx is running and configured correctly
-echo "Nginx is configured and running. You can test it by running: curl http://localhost"

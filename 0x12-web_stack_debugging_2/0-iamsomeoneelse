@@ -2,10 +2,24 @@
 # Runs the whomami command under the user passed
 
 # Error check for invalid input
-if [ $# -ne 1 ]; then 
+if [ $# -ne 1 ]; then
 	echo "The script only takes in one command"
 	exit 1;
 fi
 
 # Running whoami under specified user
 su -c "whoami" - $1
+#!/usr/bin/env bash
+# Runs the whoami command under the user passed
+
+# Error check for invalid input
+if [ "$#" -ne 1 ]; then
+    echo "The script only takes in one argument"
+    exit 1
+fi
+
+# Running whoami under the specified user
+if ! su -c "whoami" - "$1"; then
+    echo "Failed to run whoami as user $1"
+    exit 1
+fi

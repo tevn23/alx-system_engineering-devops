@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
-# Configures a new Ubuntu system by installing Nginx
+# Sets up a new Ubuntu system by installing Nginx
 # Configures Nginx to listen on port 80
 # Creates a web page displaying "Hello World!"
 # Sets up a redirect for /redirect_me to a YouTube video
-# Finally, sets a 404 not found page
+# Finally sets a 404 not found page
 # Adds a custom HTTP response header
 
-# shellcheck disable=SC2154  # Ignore undefined variable warning
+# Ignore SC2154 for shellcheck
+# shellcheck disable=SC2154
 
 echo -e "Updating package lists and installing Nginx...\n"
 sudo apt-get update -y -qq && \
@@ -30,18 +31,52 @@ cp /var/www/html/index.nginx-debian.html /var/www/html/index.nginx-debian.html.b
 # Updates the index file to display "Hello World!"
 echo -e "Hello World!" > /var/www/html/index.nginx-debian.html
 
-# Adds a redirection rule for /redirect_me to a YouTube URL
-sudo sed -i '24i\       rewrite ^/redirect_me https://www.youtube.com permanent;' /etc/nginx/sites-available/default
-
-# Adds a 404 page
+# Create custom 404 page
 echo "Ceci n'est pas une page" > /var/www/html/error_404.html
-sudo sed -i '25i\	error_page 404 /error_404.html;' /etc/nginx/sites-available/default
 
-# Adds custom HTTP response header
-HOSTNAME=$(hostname)
-sudo sed -i '/server {/,/}/s/}/\tadd_header X-Served-By '$HOSTNAME';\n}/' /etc/nginx/sites-available/default
+# Configuring Nginx
+sudo tee /etc/nginx/sites-available/default > /dev/null <<EOF
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+
+    root /var/www/html;
+    index index.html index.htm index.nginx-debian.html;
+
+    server_name _;
+
+    location / {
+        try_files \$uri \$uri/ =404;
+    }
+
+    # Add the redirect rule
+    location /redirect_me {
+        return 301 https://www.youtube.com;
+    }
+
+    # Custom 404 page
+    error_page 404 /error_404.html;
+
+    # Add the custom header
+    add_header X-Served-By \$hostname;
+}
+EOF
+
+# Validate Nginx configuration before restarting
+echo -e "\nValidating Nginx configuration...\n"
+sudo nginx -t
+
+if [ $? -ne 0 ]; then
+    echo -e "\nNginx configuration test failed. Please check the error messages above.\n"
+    exit 1
+fi
 
 # Restarts Nginx to apply the new configuration
 sudo service nginx restart
+
+if [ $? -ne 0 ]; then
+    echo -e "\nNginx failed to restart. Please check the error messages above.\n"
+    exit 1
+fi
 
 echo -e "\nSetup is complete.\n"

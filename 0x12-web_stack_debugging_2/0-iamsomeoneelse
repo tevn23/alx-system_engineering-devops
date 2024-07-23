@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+# Runs the whomami command under the user passed
+
+if [ $# -ne 1 ]; then 
+	echo "The script only takes in one command"
+	exit 1;
+fi
+# Running whoami under specified user
+su -c "whoami" - $1

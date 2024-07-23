@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+
+# Update package lists and install Nginx if not already installed
+echo -e "Updating package lists and installing Nginx...\n"
+sudo apt-get update -y -qq
+sudo apt-get install nginx -y
+
+# Provides feedback that package updates and Nginx installation are in progress
+echo -e "\nPerforming additional setup tasks...\n"
+
+# Stop Nginx service before making changes
+sudo service nginx stop
+
+# Create the nginx user if it does not exist
+if ! id -u nginx > /dev/null 2>&1; then
+    sudo useradd -r -s /bin/false nginx
+fi
+
+# Backup the original Nginx configuration file
+sudo cp /etc/nginx/nginx.conf /etc/nginx/nginx.conf.bckp
+
+# Update the Nginx configuration file to run as the nginx user and listen on port 8080
+sudo sed -i 's/user .*;/user nginx;/' /etc/nginx/nginx.conf
+sudo sed -i 's/listen 80 default_server;/listen 8080 default_server;/' /etc/nginx/sites-available/default
+sudo sed -i 's/listen \[::\]:80 default_server;/listen \[::\]:8080 default_server;/' /etc/nginx/sites-available/default
+
+# Ensure the nginx user has ownership of necessary directories
+sudo chown -R nginx:nginx /var/www/html
+sudo chown -R nginx:nginx /var/log/nginx
+sudo chown -R nginx:nginx /var/lib/nginx
+
+# Start Nginx service again
+sudo service nginx start
+
+# Check Nginx status and configuration
+sudo service nginx status
+sudo nginx -t
+
+echo -e "\nSetup is complete.\n"

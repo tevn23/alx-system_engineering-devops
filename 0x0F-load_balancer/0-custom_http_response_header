@@ -1,69 +1,47 @@
 #!/usr/bin/env bash
-# This script configures a new Ubuntu machine with Nginx, sets up a custom 404 page,
-# a 301 redirect, and adds a custom header to Nginx responses.
+# Configures a new Ubuntu system by installing Nginx
+# Configures Nginx to listen on port 80
+# Creates a web page displaying "Hello World!"
+# Sets up a redirect for /redirect_me to a YouTube video
+# Finally, sets a 404 not found page
+# Adds a custom HTTP response header
 
-# Ensure the script is run as root
-if [ "$(id -u)" -ne 0 ]; then
-    echo "This script must be run as root."
-    exit 1
-fi
+# shellcheck disable=SC2154  # Ignore undefined variable warning
 
-# Update package list and upgrade packages
-echo "Updating package list and upgrading packages..."
-apt update && apt -y upgrade
+echo -e "Updating package lists and installing Nginx...\n"
+sudo apt-get update -y -qq && \
+         sudo apt-get install nginx -y
 
-# Install Nginx if not already installed
-if ! command -v nginx > /dev/null; then
-    echo "Installing Nginx..."
-    apt -y install nginx
-fi
+echo -e "\nPerforming additional setup tasks...\n"
 
-# Configure the firewall to allow Nginx traffic
-ufw allow 'Nginx HTTP'
+# Initiates the Nginx service
+sudo service nginx start
 
-# Start Nginx if it's not already running
-if ! pgrep -x "nginx" > /dev/null; then
-    echo "Starting Nginx..."
-    service nginx start
-fi
+# Configures the firewall to allow Nginx traffic
+sudo ufw allow 'Nginx HTTP'
 
-# Set up the index page
-echo "Setting up the index page..."
-echo "Hello World!" > /var/www/html/index.nginx-debian.html
+# Adjusts file permissions and ownership for ease of editing
+sudo chown -R "$USER":"$USER" /var/www/html
+sudo chmod -R 755 /var/www
 
-# Set up custom 404 page
-echo "Setting up custom 404 page..."
-echo "Ceci n'est pas une page" > /usr/share/nginx/html/404.html
+# Saves a copy of the default index file for backup purposes
+cp /var/www/html/index.nginx-debian.html /var/www/html/index.nginx-debian.html.bckp
 
-# Modify the default Nginx site configuration
-NGINX_CONF="/etc/nginx/sites-available/default"
-echo "Configuring Nginx..."
-sed -i '/listen 80 default_server;/a\\
-    location /redirect_me {\\n\
-        return 301 https://www.youtube.com/;\\n\
-    }\\n\
-    add_header X-Served-By \$hostname always;\\n\
-    error_page 404 /404.html;\\n\
-    location = /404.html {\\n\
-        internal;\\n\
-    }' "$NGINX_CONF"
+# Updates the index file to display "Hello World!"
+echo -e "Hello World!" > /var/www/html/index.nginx-debian.html
 
-# Reload Nginx to apply changes
-echo "Reloading Nginx..."
-if nginx -t; then
-    service nginx reload
-else
-    echo "Nginx configuration error. Please check the configuration."
-    exit 1
-fi
+# Adds a redirection rule for /redirect_me to a YouTube URL
+sudo sed -i '24i\       rewrite ^/redirect_me https://www.youtube.com permanent;' /etc/nginx/sites-available/default
 
-# Verify Nginx is serving the default page
-echo "Verifying Nginx setup..."
-if curl -I http://localhost 2>/dev/null | grep -q "200 OK"; then
-    echo "Nginx is running and serving the default page."
-else
-    echo "Nginx is not serving the default page. Please check the configuration."
-    exit 1
-fi
+# Adds a 404 page
+echo "Ceci n'est pas une page" > /var/www/html/error_404.html
+sudo sed -i '25i\	error_page 404 /error_404.html;' /etc/nginx/sites-available/default
 
-echo "Nginx setup completed successfully."
+# Adds custom HTTP response header
+HOSTNAME=$(hostname)
+sudo sed -i '/server {/,/}/s/}/\tadd_header X-Served-By '$HOSTNAME';\n}/' /etc/nginx/sites-available/default
+
+# Restarts Nginx to apply the new configuration
+sudo service nginx restart
+
+echo -e "\nSetup is complete.\n"

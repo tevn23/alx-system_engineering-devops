@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Configures and runs Nginx server as nginx user
 
 # Update package lists and install Nginx if not already installed
 echo -e "Updating package lists and installing Nginx...\n"

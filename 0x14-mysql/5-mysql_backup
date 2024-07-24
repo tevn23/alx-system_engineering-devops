@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+# Creates back up for master and slave databases
+
+# Assign the provided argument to a variable
+MYSQL_ROOT_PASSWORD=$1
+
+# Get the current date in day-month-year format
+DATE=$(date +%d-%m-%Y)
+
+# Define the MySQL dump file name
+DUMP_FILE="backup.sql"
+
+# Generate the MySQL dump containing all databases
+mysqldump -u root -p$MYSQL_ROOT_PASSWORD --all-databases > $DUMP_FILE
+
+# Check if the dump was successful
+if [ $? -ne 0 ]; then
+    echo "MySQL dump failed"
+    exit 1
+fi
+
+# Create a compressed tar.gz archive with the date in the name
+ARCHIVE_NAME="${DATE}.tar.gz"
+tar -czvf $ARCHIVE_NAME $DUMP_FILE
+
+# Check if the archive creation was successful
+if [ $? -ne 0 ]; then
+    echo "Archive creation failed"
+    exit 1
+fi
+
+# Confirmation message
+echo "Backup successful: $ARCHIVE_NAME"

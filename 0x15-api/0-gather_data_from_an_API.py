@@ -17,12 +17,14 @@ def get_employee_todo_progress(employee_id):
         None
     """
     # Fetch user information
-    user_response = requests.get(f'https://jsonplaceholder.typicode.com/users/{employee_id}')
+    user_url = f'https://jsonplaceholder.typicode.com/users/{employee_id}'
+    user_response = requests.get(user_url)
     user_data = user_response.json()
     employee_name = user_data.get('name')
 
     # Fetch user's todo list
-    todos_response = requests.get(f'https://jsonplaceholder.typicode.com/todos?userId={employee_id}')
+    t_url = f'https://jsonplaceholder.typicode.com/todos?userId={employee_id}'
+    todos_response = requests.get(t_url)
     todos_data = todos_response.json()
 
     total_tasks = len(todos_data)
@@ -30,7 +32,8 @@ def get_employee_todo_progress(employee_id):
     number_of_done_tasks = len(completed_tasks)
 
     # Print the results in the required format
-    print(f'Employee {employee_name} is done with tasks({number_of_done_tasks}/{total_tasks}):')
+    print(f'Employee {employee_name} is done with tasks('
+          f'{number_of_done_tasks}/{total_tasks}):')
     for task in completed_tasks:
         print(f'\t {task.get("title")}')
 
